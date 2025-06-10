@@ -3,10 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Calendar, Building2, Plus, Edit2 } from 'lucide-react';
-import { FinancialStatement, FieldValue, AdditionalLineItem } from '@/types/financial';
-import SectionEditDialog from './SectionEditDialog';
+import { ArrowLeft, Save, Calendar, Building2, Plus, Trash2 } from 'lucide-react';
+import { FinancialStatement } from '@/types/financial';
 
 interface FinancialStatementFormProps {
   statement: FinancialStatement | null;
@@ -171,15 +169,6 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
     version: 'latest'
   });
 
-  // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<{
-    title: string;
-    path: string[];
-    data: Record<string, FieldValue | AdditionalLineItem[]>;
-    colorClass: string;
-  } | null>(null);
-
   useEffect(() => {
     if (statement) {
       // Merge existing statement with default structure to ensure all fields exist
@@ -214,6 +203,64 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
     }
   }, [statement]);
 
+  const addAdditionalLineItem = (sectionPath: string[]) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (!current.AdditionalLineItems) {
+        current.AdditionalLineItems = [];
+      }
+      
+      current.AdditionalLineItems.push({
+        name: 'Custom Line Item',
+        value: '0',
+        fieldLabel: 'Custom Line Item',
+        entries: []
+      });
+      
+      return newData;
+    });
+  };
+
+  const updateAdditionalLineItem = (sectionPath: string[], index: number, field: string, value: string) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (current.AdditionalLineItems && current.AdditionalLineItems[index]) {
+        current.AdditionalLineItems[index][field] = value;
+      }
+      
+      return newData;
+    });
+  };
+
+  const removeAdditionalLineItem = (sectionPath: string[], index: number) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (current.AdditionalLineItems) {
+        current.AdditionalLineItems.splice(index, 1);
+      }
+      
+      return newData;
+    });
+  };
+
   const updateField = (path: string[], value: string) => {
     setFormData(prev => {
       const newData = { ...prev };
@@ -227,6 +274,62 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
         current[path[path.length - 1]] = { ...current[path[path.length - 1]], value };
       } else {
         current[path[path.length - 1]] = value;
+      }
+      
+      return newData;
+    });
+  };
+
+  const addLineItem = (path: string[], fieldLabel: string) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < path.length; i++) {
+        current = current[path[i]];
+      }
+      
+      if (!current.entries) {
+        current.entries = [];
+      }
+      
+      current.entries.push({
+        name: `New ${fieldLabel} Item`,
+        value: '0'
+      });
+      
+      return newData;
+    });
+  };
+
+  const updateLineItem = (path: string[], index: number, field: 'name' | 'value', value: string) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < path.length; i++) {
+        current = current[path[i]];
+      }
+      
+      if (current.entries && current.entries[index]) {
+        current.entries[index][field] = value;
+      }
+      
+      return newData;
+    });
+  };
+
+  const removeLineItem = (path: string[], index: number) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < path.length; i++) {
+        current = current[path[i]];
+      }
+      
+      if (current.entries) {
+        current.entries.splice(index, 1);
       }
       
       return newData;
@@ -287,106 +390,217 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
     }).format(num);
   };
 
-  const openSectionDialog = (
-    title: string, 
-    path: string[], 
-    data: Record<string, FieldValue | AdditionalLineItem[]>,
-    colorClass: string
-  ) => {
-    setActiveSection({
-      title,
-      path,
-      data,
-      colorClass
-    });
-    setDialogOpen(true);
-  };
+  const renderAdditionalLineItems = (sectionPath: string[], sectionName: string, colorClass: string) => {
+    let current: any = formData;
+    for (let i = 0; i < sectionPath.length; i++) {
+      current = current[sectionPath[i]];
+    }
 
-  const handleSectionSave = (updatedData: Record<string, FieldValue | AdditionalLineItem[]>) => {
-    if (!activeSection) return;
-    
-    setFormData(prev => {
-      const newData = { ...prev };
-      let current: any = newData;
-      
-      // Navigate to the parent
-      for (let i = 0; i < activeSection.path.length; i++) {
-        current = current[activeSection.path[i]];
-      }
-      
-      // Replace the section data with updated data
-      Object.keys(updatedData).forEach(key => {
-        current[key] = updatedData[key];
-      });
-      
-      return newData;
-    });
-  };
-
-  const renderSectionSummary = (
-    title: string, 
-    path: string[], 
-    data: Record<string, FieldValue | AdditionalLineItem[]>,
-    colorClass: string
-  ) => {
-    // Get top entries by value for the summary
-    const entries = Object.entries(data)
-      .filter(([key]) => key !== 'TotalOperatingIncome' && 
-                        key !== 'TotalOperatingExpenses' && 
-                        key !== 'AdditionalLineItems')
-      .map(([key, field]) => ({
-        key,
-        label: (field as FieldValue).fieldLabel,
-        value: parseFloat((field as FieldValue).value || '0')
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 5);
-
-    // Calculate total
-    const totalKey = title.includes('Income') ? 'TotalOperatingIncome' : 'TotalOperatingExpenses';
-    const totalValue = data[totalKey] ? (data[totalKey] as FieldValue).value : '0';
+    const additionalItems = current.AdditionalLineItems || [];
 
     return (
-      <Card className="mb-6 hover:shadow-md transition-all">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className={colorClass}>{title}</CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => openSectionDialog(title, path, data, colorClass)}
+      <Card className="mb-4 border-dashed border-2">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className={`text-sm ${colorClass}`}>
+              Additional {sectionName} Items
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addAdditionalLineItem(sectionPath)}
             >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Section
+              <Plus className="h-3 w-3 mr-1" />
+              Add Custom Item
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {entries.map(entry => (
-              <div key={entry.key} className="flex justify-between items-center text-sm">
-                <span>{entry.label}</span>
-                <span className="font-medium">{formatCurrency(entry.value.toString())}</span>
-              </div>
-            ))}
-            
-            {Object.keys(data).length > 5 && (
-              <div className="text-sm text-muted-foreground text-center italic">
-                And {Object.keys(data).length - 5} more items...
-              </div>
-            )}
-            
-            <div className="border-t pt-2 flex justify-between items-center">
-              <span className="font-semibold">Total:</span>
-              <span className="font-bold text-lg">
-                {formatCurrency(totalValue)}
-              </span>
+        {additionalItems.length > 0 && (
+          <CardContent>
+            <div className="space-y-4">
+              {additionalItems.map((item: any, index: number) => (
+                <div key={index} className="border rounded-lg p-4 bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium">Custom Item #{index + 1}</Label>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeAdditionalLineItem(sectionPath, index)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Item Name</Label>
+                      <Input
+                        value={item.name || ''}
+                        onChange={(e) => updateAdditionalLineItem(sectionPath, index, 'name', e.target.value)}
+                        placeholder="Enter item name"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Total Value</Label>
+                      <Input
+                        type="number"
+                        value={item.value || ''}
+                        onChange={(e) => updateAdditionalLineItem(sectionPath, index, 'value', e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs">Line Items for {item.name}</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], item.name)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Line Item
+                      </Button>
+                    </div>
+                    
+                    {item.entries && item.entries.length > 0 && (
+                      <div className="space-y-2">
+                        {item.entries.map((entry: any, entryIndex: number) => (
+                          <div key={entryIndex} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 bg-background rounded">
+                            <div className="md:col-span-2">
+                              <Input
+                                placeholder="Entry name"
+                                value={entry.name || ''}
+                                onChange={(e) => updateLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex, 'name', e.target.value)}
+                                className="text-xs"
+                              />
+                            </div>
+                            <div>
+                              <Input
+                                type="number"
+                                placeholder="0.00"
+                                value={entry.value || ''}
+                                onChange={(e) => updateLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex, 'value', e.target.value)}
+                                step="0.01"
+                                className="text-xs"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     );
   };
+
+  const renderFieldGroup = (title: string, fields: any, basePath: string[], colorClass: string) => (
+    <div className="mb-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className={colorClass}>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {Object.entries(fields).map(([key, field]: [string, any]) => {
+              if (key.startsWith('Total') || key === 'AdditionalLineItems') return null;
+              
+              const fieldPath = [...basePath, key];
+              const entries = field?.entries || [];
+              
+              return (
+                <div key={key} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium">{field?.fieldLabel || key}</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addLineItem(fieldPath, field?.fieldLabel || key)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Line Item
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                    <div className="md:col-span-2">
+                      <Label htmlFor={key} className="text-xs">Total Value</Label>
+                      <Input
+                        id={key}
+                        type="number"
+                        value={field?.value || ''}
+                        onChange={(e) => updateField(fieldPath, e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  
+                  {entries.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Line Items:</Label>
+                      {entries.map((entry: any, index: number) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 bg-muted rounded">
+                          <div className="md:col-span-2">
+                            <Input
+                              placeholder="Item name"
+                              value={entry.name || ''}
+                              onChange={(e) => updateLineItem(fieldPath, index, 'name', e.target.value)}
+                              className="text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Input
+                              type="number"
+                              placeholder="0.00"
+                              value={entry.value || ''}
+                              onChange={(e) => updateLineItem(fieldPath, index, 'value', e.target.value)}
+                              step="0.01"
+                              className="text-xs"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeLineItem(fieldPath, index)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Additional Line Items Section */}
+      {renderAdditionalLineItems(basePath, title, colorClass)}
+    </div>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -408,7 +622,7 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
                 {statement ? 'Edit' : 'Create'} Financial Statement
               </h1>
               <p className="text-muted-foreground text-lg">
-                {statement ? 'Update' : 'Add'} profit and loss information section by section
+                {statement ? 'Update' : 'Add'} profit and loss information
               </p>
             </div>
           </div>
@@ -452,41 +666,29 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
           </CardContent>
         </Card>
 
-        {/* Financial Sections */}
-        <Tabs defaultValue="income" className="mb-6">
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="income" className="text-green-700">Income</TabsTrigger>
-            <TabsTrigger value="cogs" className="text-orange-700">Cost of Goods Sold</TabsTrigger>
-            <TabsTrigger value="expenses" className="text-red-700">Expenses</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="income">
-            {renderSectionSummary(
-              'Operating Income', 
-              ['data', 'Financials', '0', 'Income', 'Operating'], 
-              formData.data.Financials[0].Income.Operating,
-              'text-green-700'
-            )}
-          </TabsContent>
-          
-          <TabsContent value="cogs">
-            {formData.data.Financials[0].Expense.Cogs && renderSectionSummary(
-              'Cost of Goods Sold', 
-              ['data', 'Financials', '0', 'Expense', 'Cogs'], 
-              formData.data.Financials[0].Expense.Cogs,
-              'text-orange-700'
-            )}
-          </TabsContent>
-          
-          <TabsContent value="expenses">
-            {renderSectionSummary(
-              'Operating Expenses', 
-              ['data', 'Financials', '0', 'Expense', 'Operating'], 
-              formData.data.Financials[0].Expense.Operating,
-              'text-red-700'
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* Income Section */}
+        {renderFieldGroup(
+          'Operating Income', 
+          formData.data.Financials[0].Income.Operating, 
+          ['data', 'Financials', '0', 'Income', 'Operating'], 
+          'text-green-700'
+        )}
+
+        {/* COGS Section */}
+        {renderFieldGroup(
+          'Cost of Goods Sold', 
+          formData.data.Financials[0].Expense.Cogs, 
+          ['data', 'Financials', '0', 'Expense', 'Cogs'], 
+          'text-orange-700'
+        )}
+
+        {/* Operating Expenses Section */}
+        {renderFieldGroup(
+          'Operating Expenses', 
+          formData.data.Financials[0].Expense.Operating, 
+          ['data', 'Financials', '0', 'Expense', 'Operating'], 
+          'text-red-700'
+        )}
 
         {/* Financial Summary */}
         <Card className="mb-6">
@@ -536,19 +738,6 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
           </Button>
         </div>
       </form>
-
-      {/* Section Edit Dialog */}
-      {activeSection && (
-        <SectionEditDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          title={activeSection.title}
-          sectionData={activeSection.data}
-          sectionPath={activeSection.path}
-          colorClass={activeSection.colorClass}
-          onSave={handleSectionSave}
-        />
-      )}
     </div>
   );
 };
