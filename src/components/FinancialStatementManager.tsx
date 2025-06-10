@@ -18,22 +18,76 @@ const initialData: FinancialStatement = {
       Year: "2023",
       Income: {
         Operating: {
-          RentalIncome: { value: "802085", fieldLabel: "Rent Income" },
-          InterestIncome: { value: "87", fieldLabel: "Interest & Other Income" },
-          RealEstateLeaseIncome: { value: "148772", fieldLabel: "Real Estate Lease Income" },
-          OtherRevenue: { value: "10644", fieldLabel: "Other Revenue" },
+          RentalIncome: { 
+            value: "802085", 
+            fieldLabel: "Rent Income",
+            entries: [{ name: "Rent Income", value: "802085" }]
+          },
+          InterestIncome: { 
+            value: "87", 
+            fieldLabel: "Interest & Other Income",
+            entries: [{ name: "Interest & Other Income", value: "87" }]
+          },
+          RealEstateLeaseIncome: { 
+            value: "148772", 
+            fieldLabel: "Real Estate Lease Income",
+            entries: [
+              { name: "Clark House - Net Rental Income", value: "28499" },
+              { name: "The Mississippi Co. - Net Rental Income", value: "120273" }
+            ]
+          },
+          OtherRevenue: { 
+            value: "10644", 
+            fieldLabel: "Other Revenue",
+            entries: [{ name: "Social Security Income", value: "10644" }]
+          },
           TotalOperatingIncome: { value: "961588", fieldLabel: "Total Income" }
         }
       },
       Expense: {
         Operating: {
-          Insurance: { value: "54670", fieldLabel: "Insurance" },
-          BankCharges: { value: "110", fieldLabel: "Bank Service Charges" },
-          ProfessionalFees: { value: "4022", fieldLabel: "Professional Fees" },
-          PermitsAndLicenses: { value: "309", fieldLabel: "Licenses and Permits" },
-          RepairsAndMaintenance: { value: "12354", fieldLabel: "Repairs, Maint. & Tenant Imp." },
-          Utilities: { value: "26784", fieldLabel: "Utilities" },
-          OtherOperatingExpenses: { value: "419497", fieldLabel: "Other Operating Expenses" },
+          Insurance: { 
+            value: "54670", 
+            fieldLabel: "Insurance",
+            entries: [{ name: "Insurance", value: "54670" }]
+          },
+          BankCharges: { 
+            value: "110", 
+            fieldLabel: "Bank Service Charges",
+            entries: [{ name: "Bank Service Charges", value: "110" }]
+          },
+          ProfessionalFees: { 
+            value: "4022", 
+            fieldLabel: "Professional Fees",
+            entries: [{ name: "Professional Fees", value: "4022" }]
+          },
+          PermitsAndLicenses: { 
+            value: "309", 
+            fieldLabel: "Licenses and Permits",
+            entries: [{ name: "Licenses and Permits", value: "309" }]
+          },
+          RepairsAndMaintenance: { 
+            value: "12354", 
+            fieldLabel: "Repairs, Maint. & Tenant Imp.",
+            entries: [{ name: "Repairs, Maint. & Tenant Imp.", value: "12354" }]
+          },
+          Utilities: { 
+            value: "26784", 
+            fieldLabel: "Utilities",
+            entries: [{ name: "Utilities", value: "26784" }]
+          },
+          OtherOperatingExpenses: { 
+            value: "419497", 
+            fieldLabel: "Other Operating Expenses",
+            entries: [
+              { name: "Interest Expense - Commercial", value: "276749" },
+              { name: "Interest Expense - Residence", value: "32389" },
+              { name: "Landscape Maintenance", value: "14321" },
+              { name: "Alarm, Elevator and Misc Services", value: "8426" },
+              { name: "Taxes", value: "83100" },
+              { name: "Communications", value: "4512" }
+            ]
+          },
           TotalOperatingExpenses: { value: "517746", fieldLabel: "Total Expense" }
         }
       },

@@ -32,6 +32,66 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
   const netIncome = parseFloat(financial.NetIncome.value || '0');
   const isPositive = netIncome >= 0;
 
+  const renderFieldSection = (title: string, fields: any, colorClass: string) => {
+    const fieldsWithValues = Object.entries(fields).filter(([key, field]: [string, any]) => {
+      return !key.startsWith('Total') && (field?.value || (field?.entries && field.entries.length > 0));
+    });
+
+    if (fieldsWithValues.length === 0) return null;
+
+    return (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className={colorClass}>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {fieldsWithValues.map(([key, field]: [string, any]) => (
+              <div key={key} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium text-foreground">{field?.fieldLabel || key}</span>
+                  <span className={`font-semibold ${colorClass.replace('text-', 'text-')}`}>
+                    {formatCurrency(field?.value || '0')}
+                  </span>
+                </div>
+                
+                {field?.entries && field.entries.length > 0 && (
+                  <div className="ml-4 space-y-1">
+                    {field.entries.map((entry: any, index: number) => (
+                      <div key={index} className="flex justify-between text-sm text-muted-foreground">
+                        <span>{entry.name}</span>
+                        <span>{formatCurrency(entry.value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {/* Show total */}
+            {fields.TotalOperatingIncome && (
+              <div className="flex justify-between items-center py-3 border-t-2 border-green-200">
+                <span className="text-lg font-semibold text-foreground">Total Operating Income</span>
+                <span className="text-xl font-bold text-green-600">
+                  {formatCurrency(fields.TotalOperatingIncome?.value || '0')}
+                </span>
+              </div>
+            )}
+            
+            {fields.TotalOperatingExpenses && (
+              <div className="flex justify-between items-center py-3 border-t-2 border-red-200">
+                <span className="text-lg font-semibold text-foreground">Total Operating Expenses</span>
+                <span className="text-xl font-bold text-red-600">
+                  {formatCurrency(fields.TotalOperatingExpenses?.value || '0')}
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -106,13 +166,24 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
       </Card>
 
       {/* Financial Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="p-6">
             <div className="text-center">
               <p className="text-sm font-medium text-green-600 mb-2">Total Income</p>
               <p className="text-3xl font-bold text-green-900">
                 {formatCurrency(financial.Income.Operating.TotalOperatingIncome?.value || '0')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-600 mb-2">Gross Profit</p>
+              <p className="text-3xl font-bold text-blue-900">
+                {formatCurrency(financial.GrossProfit?.value || '0')}
               </p>
             </div>
           </CardContent>
@@ -129,13 +200,13 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
           </CardContent>
         </Card>
 
-        <Card className={`bg-gradient-to-br ${isPositive ? 'from-blue-50 to-blue-100 border-blue-200' : 'from-red-50 to-red-100 border-red-200'}`}>
+        <Card className={`bg-gradient-to-br ${isPositive ? 'from-purple-50 to-purple-100 border-purple-200' : 'from-red-50 to-red-100 border-red-200'}`}>
           <CardContent className="p-6">
             <div className="text-center">
-              <p className={`text-sm font-medium mb-2 ${isPositive ? 'text-blue-600' : 'text-red-600'}`}>
+              <p className={`text-sm font-medium mb-2 ${isPositive ? 'text-purple-600' : 'text-red-600'}`}>
                 Net Income
               </p>
-              <p className={`text-3xl font-bold ${isPositive ? 'text-blue-900' : 'text-red-900'}`}>
+              <p className={`text-3xl font-bold ${isPositive ? 'text-purple-900' : 'text-red-900'}`}>
                 {formatCurrency(financial.NetIncome.value || '0')}
               </p>
             </div>
@@ -144,65 +215,18 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
       </div>
 
       {/* Income Details */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-green-700">Operating Income</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Object.entries(financial.Income.Operating).map(([key, field]) => {
-              if (key === 'TotalOperatingIncome' || !field?.value) return null;
-              return (
-                <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                  <span className="text-foreground">{field.fieldLabel || key}</span>
-                  <span className="font-medium text-green-600">
-                    {formatCurrency(field.value)}
-                  </span>
-                </div>
-              );
-            })}
-            <div className="flex justify-between items-center py-3 border-t-2 border-green-200">
-              <span className="text-lg font-semibold text-foreground">Total Operating Income</span>
-              <span className="text-xl font-bold text-green-600">
-                {formatCurrency(financial.Income.Operating.TotalOperatingIncome?.value || '0')}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {renderFieldSection('Operating Income', financial.Income.Operating, 'text-green-700')}
+
+      {/* COGS Details */}
+      {financial.Expense.Cogs && renderFieldSection('Cost of Goods Sold', financial.Expense.Cogs, 'text-orange-700')}
 
       {/* Expense Details */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-red-700">Operating Expenses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Object.entries(financial.Expense.Operating).map(([key, field]) => {
-              if (key === 'TotalOperatingExpenses' || !field?.value) return null;
-              return (
-                <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                  <span className="text-foreground">{field.fieldLabel || key}</span>
-                  <span className="font-medium text-red-600">
-                    {formatCurrency(field.value)}
-                  </span>
-                </div>
-              );
-            })}
-            <div className="flex justify-between items-center py-3 border-t-2 border-red-200">
-              <span className="text-lg font-semibold text-foreground">Total Operating Expenses</span>
-              <span className="text-xl font-bold text-red-600">
-                {formatCurrency(financial.Expense.Operating.TotalOperatingExpenses?.value || '0')}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {renderFieldSection('Operating Expenses', financial.Expense.Operating, 'text-red-700')}
 
       {/* Net Income Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-primary">Net Income Summary</CardTitle>
+          <CardTitle className="text-primary">Financial Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -212,6 +236,14 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
                 {formatCurrency(financial.Income.Operating.TotalOperatingIncome?.value || '0')}
               </span>
             </div>
+            {financial.GrossProfit && (
+              <div className="flex justify-between items-center text-lg">
+                <span>Gross Profit</span>
+                <span className="font-semibold text-blue-600">
+                  {formatCurrency(financial.GrossProfit.value || '0')}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center text-lg">
               <span>Total Expenses</span>
               <span className="font-semibold text-red-600">
