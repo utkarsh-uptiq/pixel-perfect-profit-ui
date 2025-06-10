@@ -39,8 +39,8 @@ const initialData: FinancialStatement = {
       },
       NetIncome: { value: "443842", fieldLabel: "Net Income" }
     }],
-    CompanyName: { value: "Charles Evans" },
-    DocumentDate: { value: "12/31/2023" },
+    CompanyName: { value: "Charles Evans", fieldLabel: "Company Name" },
+    DocumentDate: { value: "12/31/2023", fieldLabel: "Document Date" },
     ReportingDates: ["12/31/2023"]
   },
   extractedAt: "2025-06-10T08:57:17.450Z",
