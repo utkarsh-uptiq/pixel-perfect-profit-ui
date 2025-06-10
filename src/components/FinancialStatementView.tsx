@@ -96,25 +96,6 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
                 )}
               </div>
             ))}
-            
-            {/* Show total */}
-            {fields.TotalOperatingIncome && (
-              <div className="flex justify-between items-center py-3 border-t-2 border-green-200">
-                <span className="text-lg font-semibold text-foreground">Total Operating Income</span>
-                <span className="text-xl font-bold text-green-600">
-                  {formatCurrency(fields.TotalOperatingIncome?.value || '0')}
-                </span>
-              </div>
-            )}
-            
-            {fields.TotalOperatingExpenses && (
-              <div className="flex justify-between items-center py-3 border-t-2 border-red-200">
-                <span className="text-lg font-semibold text-foreground">Total Operating Expenses</span>
-                <span className="text-xl font-bold text-red-600">
-                  {formatCurrency(fields.TotalOperatingExpenses?.value || '0')}
-                </span>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -208,7 +189,7 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
             <div className="text-center">
               <p className="text-sm font-medium text-green-600 mb-2">Total Income</p>
               <p className="text-3xl font-bold text-green-900">
-                {formatCurrency(financial.Income.Operating.TotalOperatingIncome?.value || '0')}
+                {formatCurrency(financial.Income.TotalOperatingIncome?.value || '0')}
               </p>
             </div>
           </CardContent>
@@ -230,7 +211,7 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
             <div className="text-center">
               <p className="text-sm font-medium text-red-600 mb-2">Total Expenses</p>
               <p className="text-3xl font-bold text-red-900">
-                {formatCurrency(financial.Expense.Operating.TotalOperatingExpenses?.value || '0')}
+                {formatCurrency(financial.Expense.TotalOperatingExpenses?.value || '0')}
               </p>
             </div>
           </CardContent>
@@ -253,11 +234,39 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
       {/* Income Details */}
       {renderFieldSection('Operating Income', financial.Income.Operating, 'text-green-700', 'income')}
 
+      {/* Show Total Operating Income */}
+      {financial.Income.TotalOperatingIncome && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center py-3 border-t-2 border-green-200">
+              <span className="text-lg font-semibold text-foreground">Total Operating Income</span>
+              <span className="text-xl font-bold text-green-600">
+                {formatCurrency(financial.Income.TotalOperatingIncome.value || '0')}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* COGS Details */}
       {financial.Expense.Cogs && renderFieldSection('Cost of Goods Sold', financial.Expense.Cogs, 'text-orange-700', 'cogs')}
 
       {/* Expense Details */}
       {renderFieldSection('Operating Expenses', financial.Expense.Operating, 'text-red-700', 'expenses')}
+
+      {/* Show Total Operating Expenses */}
+      {financial.Expense.TotalOperatingExpenses && (
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center py-3 border-t-2 border-red-200">
+              <span className="text-lg font-semibold text-foreground">Total Operating Expenses</span>
+              <span className="text-xl font-bold text-red-600">
+                {formatCurrency(financial.Expense.TotalOperatingExpenses.value || '0')}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Net Income Summary */}
       <Card id="summary-section">
@@ -269,7 +278,7 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
             <div className="flex justify-between items-center text-lg">
               <span>Total Income</span>
               <span className="font-semibold text-green-600">
-                {formatCurrency(financial.Income.Operating.TotalOperatingIncome?.value || '0')}
+                {formatCurrency(financial.Income.TotalOperatingIncome?.value || '0')}
               </span>
             </div>
             {financial.GrossProfit && (
@@ -283,7 +292,7 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
             <div className="flex justify-between items-center text-lg">
               <span>Total Expenses</span>
               <span className="font-semibold text-red-600">
-                ({formatCurrency(financial.Expense.Operating.TotalOperatingExpenses?.value || '0')})
+                ({formatCurrency(financial.Expense.TotalOperatingExpenses?.value || '0')})
               </span>
             </div>
             <div className="border-t-2 pt-4">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,9 +40,9 @@ const initialData: FinancialStatement = {
             value: "10644", 
             fieldLabel: "Other Revenue",
             entries: [{ name: "Social Security Income", value: "10644" }]
-          },
-          TotalOperatingIncome: { value: "961588", fieldLabel: "Total Income" }
-        }
+          }
+        },
+        TotalOperatingIncome: { value: "961588", fieldLabel: "Total Income" }
       },
       Expense: {
         Operating: {
@@ -86,9 +87,9 @@ const initialData: FinancialStatement = {
               { name: "Taxes", value: "83100" },
               { name: "Communications", value: "4512" }
             ]
-          },
-          TotalOperatingExpenses: { value: "517746", fieldLabel: "Total Expense" }
-        }
+          }
+        },
+        TotalOperatingExpenses: { value: "517746", fieldLabel: "Total Expense" }
       },
       NetIncome: { value: "443842", fieldLabel: "Net Income" }
     }],
@@ -208,7 +209,7 @@ const FinancialStatementManager = () => {
                 <p className="text-sm font-medium text-green-600">Total Income</p>
                 <p className="text-2xl font-bold text-green-900">
                   {formatCurrency(statements.reduce((sum, s) => 
-                    sum + parseFloat(s.data.Financials[0]?.Income?.Operating?.TotalOperatingIncome?.value || '0'), 0
+                    sum + parseFloat(s.data.Financials[0]?.Income?.TotalOperatingIncome?.value || '0'), 0
                   ).toString())}
                 </p>
               </div>
@@ -224,7 +225,7 @@ const FinancialStatementManager = () => {
                 <p className="text-sm font-medium text-red-600">Total Expenses</p>
                 <p className="text-2xl font-bold text-red-900">
                   {formatCurrency(statements.reduce((sum, s) => 
-                    sum + parseFloat(s.data.Financials[0]?.Expense?.Operating?.TotalOperatingExpenses?.value || '0'), 0
+                    sum + parseFloat(s.data.Financials[0]?.Expense?.TotalOperatingExpenses?.value || '0'), 0
                   ).toString())}
                 </p>
               </div>
@@ -272,13 +273,13 @@ const FinancialStatementManager = () => {
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Income:</span>
                     <span className="text-sm font-medium text-green-600">
-                      {formatCurrency(statement.data.Financials[0]?.Income?.Operating?.TotalOperatingIncome?.value || '0')}
+                      {formatCurrency(statement.data.Financials[0]?.Income?.TotalOperatingIncome?.value || '0')}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Expenses:</span>
                     <span className="text-sm font-medium text-red-600">
-                      {formatCurrency(statement.data.Financials[0]?.Expense?.Operating?.TotalOperatingExpenses?.value || '0')}
+                      {formatCurrency(statement.data.Financials[0]?.Expense?.TotalOperatingExpenses?.value || '0')}
                     </span>
                   </div>
                   <div className="flex justify-between border-t pt-2">
