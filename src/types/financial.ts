@@ -1,3 +1,4 @@
+
 export interface FieldValue {
   bbox?: any[];
   value: string;
@@ -110,7 +111,6 @@ export interface OperatingIncome {
   CommunityServicesAndHousingSupport?: FieldValue;
   RemediationAndHazardousWasteRevenue?: FieldValue;
   ExpertTestimonyAndSpecializedServices?: FieldValue;
-  TotalOperatingIncome?: FieldValue;
   AdditionalLineItems?: AdditionalLineItem[];
   [key: string]: FieldValue | AdditionalLineItem[] | undefined;
 }
@@ -145,7 +145,6 @@ export interface OperatingExpense {
   TravelAndEntertainment?: FieldValue;
   EmployeeBenefitPrograms?: FieldValue;
   GuaranteedPaymentsToPartners?: FieldValue;
-  TotalOperatingExpenses?: FieldValue;
   AdditionalLineItems?: AdditionalLineItem[];
   [key: string]: FieldValue | AdditionalLineItem[] | undefined;
 }
@@ -154,10 +153,12 @@ export interface Financial {
   Year: string;
   Income: {
     Operating: OperatingIncome;
+    TotalOperatingIncome?: FieldValue;
   };
   Expense: {
     Cogs?: CostOfGoodsSold;
     Operating: OperatingExpense;
+    TotalOperatingExpenses?: FieldValue;
   };
   NetIncome: FieldValue;
   GrossProfit?: FieldValue;

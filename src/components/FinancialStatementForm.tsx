@@ -76,12 +76,12 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
         <CardContent>
           <div className="space-y-4">
             <div>
-              <Label htmlFor={`${basePath}.value`}>Total Value</Label>
+              <Label htmlFor={`${basePath}-value`}>Total Value</Label>
               <Input
-                id={`${basePath}.value`}
+                id={`${basePath}-value`}
                 type="number"
                 step="0.01"
-                {...register(`${basePath}.value`)}
+                {...register(`${basePath}.value` as any)}
                 data-field={`${sectionKey}-${fieldKey}`}
               />
             </div>
@@ -166,7 +166,7 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
           <CardContent>
             {statement.data.Financials[0].Income.Operating && 
               Object.entries(statement.data.Financials[0].Income.Operating).map(([key, field]) => {
-                if (key === 'AdditionalLineItems' || key === 'TotalOperatingIncome') return null;
+                if (key === 'AdditionalLineItems') return null;
                 if (!field || typeof field !== 'object' || !('fieldLabel' in field)) return null;
                 
                 return renderFieldWithEntries(
@@ -219,7 +219,7 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
           </CardHeader>
           <CardContent>
             {Object.entries(statement.data.Financials[0].Expense.Operating).map(([key, field]) => {
-              if (key === 'AdditionalLineItems' || key === 'TotalOperatingExpenses') return null;
+              if (key === 'AdditionalLineItems') return null;
               if (!field || typeof field !== 'object' || !('fieldLabel' in field)) return null;
               
               return renderFieldWithEntries(
