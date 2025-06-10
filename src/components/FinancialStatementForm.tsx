@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -204,6 +203,64 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
     }
   }, [statement]);
 
+  const addAdditionalLineItem = (sectionPath: string[]) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (!current.AdditionalLineItems) {
+        current.AdditionalLineItems = [];
+      }
+      
+      current.AdditionalLineItems.push({
+        name: 'Custom Line Item',
+        value: '0',
+        fieldLabel: 'Custom Line Item',
+        entries: []
+      });
+      
+      return newData;
+    });
+  };
+
+  const updateAdditionalLineItem = (sectionPath: string[], index: number, field: string, value: string) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (current.AdditionalLineItems && current.AdditionalLineItems[index]) {
+        current.AdditionalLineItems[index][field] = value;
+      }
+      
+      return newData;
+    });
+  };
+
+  const removeAdditionalLineItem = (sectionPath: string[], index: number) => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      let current: any = newData;
+      
+      for (let i = 0; i < sectionPath.length; i++) {
+        current = current[sectionPath[i]];
+      }
+      
+      if (current.AdditionalLineItems) {
+        current.AdditionalLineItems.splice(index, 1);
+      }
+      
+      return newData;
+    });
+  };
+
   const updateField = (path: string[], value: string) => {
     setFormData(prev => {
       const newData = { ...prev };
@@ -332,89 +389,216 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
     }).format(num);
   };
 
-  const renderFieldGroup = (title: string, fields: any, basePath: string[], colorClass: string) => (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className={colorClass}>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {Object.entries(fields).map(([key, field]: [string, any]) => {
-            if (key.startsWith('Total') || key === 'AdditionalLineItems') return null;
-            
-            const fieldPath = [...basePath, key];
-            const entries = field?.entries || [];
-            
-            return (
-              <div key={key} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-medium">{field?.fieldLabel || key}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addLineItem(fieldPath, field?.fieldLabel || key)}
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add Line Item
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
-                  <div className="md:col-span-2">
-                    <Label htmlFor={key} className="text-xs">Total Value</Label>
-                    <Input
-                      id={key}
-                      type="number"
-                      value={field?.value || ''}
-                      onChange={(e) => updateField(fieldPath, e.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                    />
+  const renderAdditionalLineItems = (sectionPath: string[], sectionName: string, colorClass: string) => {
+    let current: any = formData;
+    for (let i = 0; i < sectionPath.length; i++) {
+      current = current[sectionPath[i]];
+    }
+
+    const additionalItems = current.AdditionalLineItems || [];
+
+    return (
+      <Card className="mb-4 border-dashed border-2">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className={`text-sm ${colorClass}`}>
+              Additional {sectionName} Items
+            </CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addAdditionalLineItem(sectionPath)}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Add Custom Item
+            </Button>
+          </div>
+        </CardHeader>
+        {additionalItems.length > 0 && (
+          <CardContent>
+            <div className="space-y-4">
+              {additionalItems.map((item: any, index: number) => (
+                <div key={index} className="border rounded-lg p-4 bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium">Custom Item #{index + 1}</Label>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeAdditionalLineItem(sectionPath, index)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
-                
-                {entries.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium">Line Items:</Label>
-                    {entries.map((entry: any, index: number) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 bg-muted rounded">
-                        <div className="md:col-span-2">
-                          <Input
-                            placeholder="Item name"
-                            value={entry.name || ''}
-                            onChange={(e) => updateLineItem(fieldPath, index, 'name', e.target.value)}
-                            className="text-xs"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="number"
-                            placeholder="0.00"
-                            value={entry.value || ''}
-                            onChange={(e) => updateLineItem(fieldPath, index, 'value', e.target.value)}
-                            step="0.01"
-                            className="text-xs"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeLineItem(fieldPath, index)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Item Name</Label>
+                      <Input
+                        value={item.name || ''}
+                        onChange={(e) => updateAdditionalLineItem(sectionPath, index, 'name', e.target.value)}
+                        placeholder="Enter item name"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Total Value</Label>
+                      <Input
+                        type="number"
+                        value={item.value || ''}
+                        onChange={(e) => updateAdditionalLineItem(sectionPath, index, 'value', e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs">Line Items for {item.name}</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], item.name)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Line Item
+                      </Button>
+                    </div>
+                    
+                    {item.entries && item.entries.length > 0 && (
+                      <div className="space-y-2">
+                        {item.entries.map((entry: any, entryIndex: number) => (
+                          <div key={entryIndex} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 bg-background rounded">
+                            <div className="md:col-span-2">
+                              <Input
+                                placeholder="Entry name"
+                                value={entry.name || ''}
+                                onChange={(e) => updateLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex, 'name', e.target.value)}
+                                className="text-xs"
+                              />
+                            </div>
+                            <div>
+                              <Input
+                                type="number"
+                                placeholder="0.00"
+                                value={entry.value || ''}
+                                onChange={(e) => updateLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex, 'value', e.target.value)}
+                                step="0.01"
+                                className="text-xs"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeLineItem([...sectionPath, 'AdditionalLineItems', index.toString()], entryIndex)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
+      </Card>
+    );
+  };
+
+  const renderFieldGroup = (title: string, fields: any, basePath: string[], colorClass: string) => (
+    <div className="mb-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className={colorClass}>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {Object.entries(fields).map(([key, field]: [string, any]) => {
+              if (key.startsWith('Total') || key === 'AdditionalLineItems') return null;
+              
+              const fieldPath = [...basePath, key];
+              const entries = field?.entries || [];
+              
+              return (
+                <div key={key} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium">{field?.fieldLabel || key}</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addLineItem(fieldPath, field?.fieldLabel || key)}
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Line Item
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                    <div className="md:col-span-2">
+                      <Label htmlFor={key} className="text-xs">Total Value</Label>
+                      <Input
+                        id={key}
+                        type="number"
+                        value={field?.value || ''}
+                        onChange={(e) => updateField(fieldPath, e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  
+                  {entries.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium">Line Items:</Label>
+                      {entries.map((entry: any, index: number) => (
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 bg-muted rounded">
+                          <div className="md:col-span-2">
+                            <Input
+                              placeholder="Item name"
+                              value={entry.name || ''}
+                              onChange={(e) => updateLineItem(fieldPath, index, 'name', e.target.value)}
+                              className="text-xs"
+                            />
+                          </div>
+                          <div>
+                            <Input
+                              type="number"
+                              placeholder="0.00"
+                              value={entry.value || ''}
+                              onChange={(e) => updateLineItem(fieldPath, index, 'value', e.target.value)}
+                              step="0.01"
+                              className="text-xs"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeLineItem(fieldPath, index)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Additional Line Items Section */}
+      {renderAdditionalLineItems(basePath, title, colorClass)}
+    </div>
   );
 
   return (
@@ -558,3 +742,5 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
 };
 
 export default FinancialStatementForm;
+
+}

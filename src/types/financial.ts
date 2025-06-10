@@ -1,4 +1,3 @@
-
 export interface FieldValue {
   bbox?: any[];
   value: string;
@@ -10,6 +9,13 @@ export interface LineItem {
   bbox?: any[];
   name: string;
   value: string;
+}
+
+export interface AdditionalLineItem {
+  name: string;
+  value: string;
+  fieldLabel: string;
+  entries?: LineItem[];
 }
 
 export interface OperatingIncome {
@@ -105,7 +111,8 @@ export interface OperatingIncome {
   RemediationAndHazardousWasteRevenue?: FieldValue;
   ExpertTestimonyAndSpecializedServices?: FieldValue;
   TotalOperatingIncome?: FieldValue;
-  [key: string]: FieldValue | undefined;
+  AdditionalLineItems?: AdditionalLineItem[];
+  [key: string]: FieldValue | AdditionalLineItem[] | undefined;
 }
 
 export interface CostOfGoodsSold {
@@ -113,7 +120,8 @@ export interface CostOfGoodsSold {
   CostOfLabor?: FieldValue;
   Depreciation?: FieldValue;
   OtherCostOfGoodsSold?: FieldValue;
-  [key: string]: FieldValue | undefined;
+  AdditionalLineItems?: AdditionalLineItem[];
+  [key: string]: FieldValue | AdditionalLineItem[] | undefined;
 }
 
 export interface OperatingExpense {
@@ -138,7 +146,8 @@ export interface OperatingExpense {
   EmployeeBenefitPrograms?: FieldValue;
   GuaranteedPaymentsToPartners?: FieldValue;
   TotalOperatingExpenses?: FieldValue;
-  [key: string]: FieldValue | undefined;
+  AdditionalLineItems?: AdditionalLineItem[];
+  [key: string]: FieldValue | AdditionalLineItem[] | undefined;
 }
 
 export interface Financial {
