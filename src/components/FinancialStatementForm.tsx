@@ -339,23 +339,24 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
   const calculateTotals = () => {
     const financial = formData.data.Financials[0];
     
-    // Calculate total income (excluding TotalOperatingIncome)
+    // Calculate total income (excluding TotalOperatingIncome and AdditionalLineItems)
     const incomeTotal = Object.entries(financial.Income.Operating).reduce((sum, [key, field]) => {
-      if (key === 'TotalOperatingIncome') return sum;
-      const value = field?.value || '0';
+      if (key === 'TotalOperatingIncome' || key === 'AdditionalLineItems') return sum;
+      const value = (field as any)?.value || '0';
       return sum + parseFloat(value);
     }, 0);
     
-    // Calculate total COGS
+    // Calculate total COGS (excluding AdditionalLineItems)
     const cogsTotal = Object.entries(financial.Expense.Cogs || {}).reduce((sum, [key, field]) => {
-      const value = field?.value || '0';
+      if (key === 'AdditionalLineItems') return sum;
+      const value = (field as any)?.value || '0';
       return sum + parseFloat(value);
     }, 0);
     
-    // Calculate total operating expenses (excluding TotalOperatingExpenses)
+    // Calculate total operating expenses (excluding TotalOperatingExpenses and AdditionalLineItems)
     const operatingExpensesTotal = Object.entries(financial.Expense.Operating).reduce((sum, [key, field]) => {
-      if (key === 'TotalOperatingExpenses') return sum;
-      const value = field?.value || '0';
+      if (key === 'TotalOperatingExpenses' || key === 'AdditionalLineItems') return sum;
+      const value = (field as any)?.value || '0';
       return sum + parseFloat(value);
     }, 0);
     
