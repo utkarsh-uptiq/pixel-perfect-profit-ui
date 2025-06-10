@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Trash2, Calendar, Building2, Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { FinancialStatement } from '@/types/financial';
+import FieldFilter from './FieldFilter';
 
 interface FinancialStatementViewProps {
   statement: FinancialStatement;
@@ -32,22 +33,50 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
   const netIncome = parseFloat(financial.NetIncome.value || '0');
   const isPositive = netIncome >= 0;
 
-  const renderFieldSection = (title: string, fields: any, colorClass: string) => {
+  const handleFieldSelect = (sectionId: string, fieldKey: string, fieldLabel: string) => {
+    const anchor = `#${sectionId}-section`;
+    const element = document.querySelector(anchor);
+    element?.scrollIntoView({ behavior: 'smooth' });
+    
+    // Highlight the specific field
+    setTimeout(() => {
+      const fieldElement = document.querySelector(`[data-field="${sectionId}-${fieldKey}"]`);
+      if (fieldElement) {
+        fieldElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        setTimeout(() => {
+          fieldElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        }, 3000);
+      }
+    }, 500);
+  };
+
+  const handleAddCustomItem = (sectionId: string) => {
+    const anchor = `#${sectionId}-section`;
+    const element = document.querySelector(anchor);
+    element?.scrollIntoView({ behavior: 'smooth' });
+    console.log(`Add custom item to ${sectionId} section`);
+  };
+
+  const renderFieldSection = (title: string, fields: any, colorClass: string, sectionId: string) => {
     const fieldsWithValues = Object.entries(fields).filter(([key, field]: [string, any]) => {
-      return !key.startsWith('Total') && (field?.value || (field?.entries && field.entries.length > 0));
+      return !key.startsWith('Total') && !key.includes('AdditionalLineItems') && (field?.value || (field?.entries && field.entries.length > 0));
     });
 
     if (fieldsWithValues.length === 0) return null;
 
     return (
-      <Card className="mb-6">
+      <Card className="mb-6" id={`${sectionId}-section`}>
         <CardHeader>
           <CardTitle className={colorClass}>{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {fieldsWithValues.map(([key, field]: [string, any]) => (
-              <div key={key} className="border-b border-gray-100 last:border-0 pb-3 last:pb-0">
+              <div 
+                key={key} 
+                className="border-b border-gray-100 last:border-0 pb-3 last:pb-0 transition-all duration-300"
+                data-field={`${sectionId}-${key}`}
+              >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-foreground">{field?.fieldLabel || key}</span>
                   <span className={`font-semibold ${colorClass.replace('text-', 'text-')}`}>
@@ -129,6 +158,13 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Field Filter */}
+      <FieldFilter
+        statement={statement}
+        onFieldSelect={handleFieldSelect}
+        onAddCustomItem={handleAddCustomItem}
+      />
 
       {/* Document Info */}
       <Card className="mb-6">
@@ -215,16 +251,16 @@ const FinancialStatementView: React.FC<FinancialStatementViewProps> = ({
       </div>
 
       {/* Income Details */}
-      {renderFieldSection('Operating Income', financial.Income.Operating, 'text-green-700')}
+      {renderFieldSection('Operating Income', financial.Income.Operating, 'text-green-700', 'income')}
 
       {/* COGS Details */}
-      {financial.Expense.Cogs && renderFieldSection('Cost of Goods Sold', financial.Expense.Cogs, 'text-orange-700')}
+      {financial.Expense.Cogs && renderFieldSection('Cost of Goods Sold', financial.Expense.Cogs, 'text-orange-700', 'cogs')}
 
       {/* Expense Details */}
-      {renderFieldSection('Operating Expenses', financial.Expense.Operating, 'text-red-700')}
+      {renderFieldSection('Operating Expenses', financial.Expense.Operating, 'text-red-700', 'expenses')}
 
       {/* Net Income Summary */}
-      <Card>
+      <Card id="summary-section">
         <CardHeader>
           <CardTitle className="text-primary">Financial Summary</CardTitle>
         </CardHeader>
