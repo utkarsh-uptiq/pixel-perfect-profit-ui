@@ -55,7 +55,7 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
         ChangeOrderRevenue: { value: '', fieldLabel: 'Change Order Revenue' },
         EventPromotionFees: { value: '', fieldLabel: 'Event Promotion Fees' },
         MaintenanceRevenue: { value: '', fieldLabel: 'Maintenance Revenue' },
-        RetainerFeesEarned: { value: '', fieldLabel: 'Retainer Fees Earned' },
+        RetainerFeesEarned: { value: '', fieldLabel: 'RetainerFees Earned' },
         RvSiteRentalIncome: { value: '', fieldLabel: 'RV Site Rental Income' },
         SponsorshipRevenue: { value: '', fieldLabel: 'Sponsorship Revenue' },
         VehicleLeaseIncome: { value: '', fieldLabel: 'Vehicle Lease Income' },
@@ -742,5 +742,3 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
 };
 
 export default FinancialStatementForm;
-
-}
