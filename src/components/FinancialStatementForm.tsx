@@ -18,7 +18,22 @@ const FinancialStatementForm: React.FC<FinancialStatementFormProps> = ({
   onBack,
   onSave,
 }) => {
-  const [formData, setFormData] = useState(statement?.data || {});
+  const defaultFormData = {
+    CompanyName: { value: '', fieldLabel: 'Company Name' },
+    DocumentDate: { value: '', fieldLabel: 'Document Date' },
+    Financials: [{
+      Year: new Date().getFullYear().toString(),
+      Income: {
+        Operating: {}
+      },
+      Expense: {
+        Operating: {}
+      },
+      NetIncome: { value: '0', fieldLabel: 'Net Income' }
+    }]
+  };
+
+  const [formData, setFormData] = useState(statement?.data || defaultFormData);
 
   const handleFieldSelect = (sectionId: string, fieldKey: string, fieldLabel: string) => {
     // Scroll to the specific field
