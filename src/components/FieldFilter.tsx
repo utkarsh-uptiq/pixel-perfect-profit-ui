@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Search, Plus, Anchor } from 'lucide-react';
-import { FinancialStatement } from '@/types/financial';
+import { FinancialStatement, FieldValue, AdditionalLineItem } from '@/types/financial';
 
 interface FieldFilterProps {
   statement: FinancialStatement;
@@ -37,7 +36,8 @@ const FieldFilter: React.FC<FieldFilterProps> = ({
 
     // Extract Income fields
     Object.entries(financial.Income.Operating).forEach(([key, field]) => {
-      if (key !== 'AdditionalLineItems' && field?.fieldLabel) {
+      // Skip AdditionalLineItems and check if field is a FieldValue object with fieldLabel
+      if (key !== 'AdditionalLineItems' && field && typeof field === 'object' && 'fieldLabel' in field) {
         fields.push({
           key,
           label: field.fieldLabel,
@@ -51,7 +51,8 @@ const FieldFilter: React.FC<FieldFilterProps> = ({
     // Extract COGS fields
     if (financial.Expense.Cogs) {
       Object.entries(financial.Expense.Cogs).forEach(([key, field]) => {
-        if (key !== 'AdditionalLineItems' && field?.fieldLabel) {
+        // Skip AdditionalLineItems and check if field is a FieldValue object with fieldLabel
+        if (key !== 'AdditionalLineItems' && field && typeof field === 'object' && 'fieldLabel' in field) {
           fields.push({
             key,
             label: field.fieldLabel,
@@ -65,7 +66,8 @@ const FieldFilter: React.FC<FieldFilterProps> = ({
 
     // Extract Operating Expense fields
     Object.entries(financial.Expense.Operating).forEach(([key, field]) => {
-      if (key !== 'AdditionalLineItems' && field?.fieldLabel) {
+      // Skip AdditionalLineItems and check if field is a FieldValue object with fieldLabel
+      if (key !== 'AdditionalLineItems' && field && typeof field === 'object' && 'fieldLabel' in field) {
         fields.push({
           key,
           label: field.fieldLabel,
